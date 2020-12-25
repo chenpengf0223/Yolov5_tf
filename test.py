@@ -25,22 +25,22 @@ if __name__ == '__main__':
     gpu_id = '0' #argv[1]
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
-    pb_file = 'ckpts/social_yolov3_test-loss=3.2020.ckpt-198.pb' #argv[2]
+    pb_file = 'checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb' #argv[2]
     if not os.path.exists(pb_file):
         print('pb_file=%s not exist' % pb_file)
         sys.exit()
 
-    img_path_file = 'D:/datasets/Social/test' #argv[3]
+    img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/tusi/tusi-201130-1647' #argv[3]
     if not os.path.exists(img_path_file):
         print('img_path_file=%s not exist' % img_path_file)
         sys.exit()
 
-    out_path = 'D:/datasets/Social/out' #argv[4]
+    out_path = 'det_out' #argv[4]
     if not os.path.exists(out_path):
         os.makedirs(out_path)
     print('test gpu_id=%s, pb_file=%s, img_file=%s, out_path=%s' % (gpu_id, pb_file, img_path_file, out_path))
 
-    num_classes = 1
+    num_classes = 4
     input_size = 416
     score_thresh = 0.6
 
@@ -111,18 +111,21 @@ if __name__ == '__main__':
                 bboxes = utils.postprocess_boxes(pred_bbox, img_size, input_size, score_thresh)
                 bboxes = utils.nms(bboxes, iou_type, iou_thresh, method='nms')
 
+                # if len(bboxes) > 0:
+                image = utils.draw_bbox(img, bboxes)
+                #image = Image.fromarray(image)
+                #image.show()
+                out_img = np.asarray(image)
                 if len(bboxes) > 0:
-                    image = utils.draw_bbox(img, bboxes)
-                    #image = Image.fromarray(image)
-                    #image.show()
-                    out_img = np.asarray(image)
                     score = bboxes[0][4]
+                else:
+                    score = 0
 
-                    file_path, file_name = os.path.split(in_img_file)
-                    file, postfix = os.path.splitext(file_name)
-                    out_file = os.path.join(out_path, file + '_%.6f' % (score) + postfix)
+                file_path, file_name = os.path.split(in_img_file)
+                file, postfix = os.path.splitext(file_name)
+                out_file = os.path.join(out_path, file + '_%.6f' % (score) + postfix)
 
-                    cv2.imwrite(out_file, out_img)
-                    print('idx=', idx, 'in_img_file=', in_img_file, 'out_file=', out_file)
+                cv2.imwrite(out_file, out_img)
+                print('idx=', idx, 'in_img_file=', in_img_file, 'out_file=', out_file)
         else:
             print('img_path_file=%s is error' % img_path_file)

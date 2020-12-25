@@ -1,8 +1,10 @@
+import sys
+sys.path.append(".")
+
 import numpy as np
 import tensorflow as tf
-from core.yolov3 import YOLOV3
+# from core.yolov3 import YOLOV3
 from core.yolov4 import YOLOV4
-
 
 def load_weights(var_list, weights_file):
     """Loads and converts pre-trained weights.

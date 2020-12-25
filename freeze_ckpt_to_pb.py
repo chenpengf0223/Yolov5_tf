@@ -22,7 +22,7 @@ if __name__ == "__main__":
     """
     gpu_id = '0' #argv[1]
     net_type = 'yolov3' #argv[2]
-    ckpt_file = 'ckpts/social_yolov3_test-loss=3.2020.ckpt-198' #argv[3]
+    ckpt_file = 'checkpoint-v2/social_yolov3_test-loss=56.9129.ckpt-2' #argv[3]
     if not os.path.exists(ckpt_file + '.index'):
         print('freeze_ckpt_to_pb ckpt_file=', ckpt_file, ' not exist')
         sys.exit()

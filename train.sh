@@ -1,0 +1,1 @@
+python3 train.py 0 yolov3
