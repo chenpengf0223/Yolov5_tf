@@ -10,8 +10,10 @@ import core.utils as utils
 import os
 from core.config import cfg
 
-flags.DEFINE_string('weights', './checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb', 'path to weights file')
-flags.DEFINE_string('output', './yolov4-416-fp32-tf1.tflite', 'path to output')
+# flags.DEFINE_string('weights', './checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb', 'path to weights file')
+flags.DEFINE_string('weights', './checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567.pb', 'path to weights file')
+
+flags.DEFINE_string('output', './yolov3-416-fp32-qixing.tflite', 'path to output')
 flags.DEFINE_integer('input_size', 416, 'path to output')
 flags.DEFINE_string('quantize_mode', 'float32', 'quantize mode (int8, float16, float32)')
 flags.DEFINE_string('dataset', "/Volumes/Elements/imgs/coco_dataset/coco/5k.txt", 'path to dataset')
@@ -56,8 +58,9 @@ def save_tflite():
   logging.info("model saved to: {}".format(FLAGS.output))
 
 def demo():
-  img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/zhibeidangao/zhibeidangao-201201-1202' #argv[3]
-  out_path = 'det_out-tflite' #argv[4]
+  img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test' #argv[3]
+  # img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/zhibeidangao/test-z' #argv[3]
+  out_path = 'det_out-tflite-12-30' #argv[4]
   if not os.path.exists(out_path):
     os.makedirs(out_path)
   if not os.path.exists(img_path_file):
@@ -71,26 +74,39 @@ def demo():
   print(input_details)
   output_details = interpreter.get_output_details()
   print(output_details)
-  input_size = 416
 
   input_shape = input_details[0]['shape']
-  img_files = os.listdir(img_path_file)
-  for idx, img_file in enumerate(img_files):
-    in_img_file = os.path.join(img_path_file, img_file)
+  img_files = []
+  for files in os.walk(img_path_file):
+    print(files[0])
+    for tp_f in files[2]:
+      img_files.append(files[0] + '/' + tp_f)
+    input()
+  for idx, in_img_file in enumerate(img_files):
     #print('idx=', idx, 'in_img_file=', in_img_file)
     if not os.path.exists(in_img_file):
       print('idx=', idx, 'in_img_file=', in_img_file, ' not exist')
       continue
 
     img = cv2.imread(in_img_file)
+    if in_img_file[-4:] != '.jpg':
+      print('not jpg ', in_img_file)
+      continue
     if img is None:
       print('idx=', idx, 'in_img_file=', in_img_file, ' read error')
       continue
     # input_data = np.array(np.random.random_sample(input_shape), dtype=np.float32)
     img_size = img.shape[:2]
-    image_data = utils.image_preporcess(np.copy(img), [input_size, input_size])
+    image_data = utils.image_preporcess(np.copy(img), [FLAGS.input_size, FLAGS.input_size])
     input_data = image_data[np.newaxis, ...].astype(np.float32)
+
+    # input_data0 = np.ones((1, 416, 416), np.float32)*0.2
+    # input_data1 = np.ones((1, 416, 416), np.float32)*0.6
+    # input_data2 = np.ones((1, 416, 416), np.float32)*0.5
+    # input_data = np.stack((input_data0, input_data1, input_data2), axis=3)
     print('input_data', input_data.shape, input_data.dtype)
+    print(input_data[0, 0, 0, 0], input_data[0, 0, 0, 1], input_data[0, 0, 0, 2],
+    input_data[0, 200, 200, 0], input_data[0, 200, 200, 1], input_data[0, 200, 200, 2])
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     output_data = [interpreter.get_tensor(output_details[i]['index']) for i in range(len(output_details))]
@@ -98,6 +114,12 @@ def demo():
     print(type(output_data))
     pred_sbbox, pred_mbbox, pred_lbbox = output_data
     print(pred_sbbox.shape, pred_mbbox.shape, pred_lbbox.shape, img_size)
+    
+    print(pred_sbbox[0, 20, 20, 0, 4], 
+     pred_sbbox[0, 20, 20, 0, 5], pred_sbbox[0, 20, 20, 0, 6], pred_sbbox[0, 20, 20, 0, 7], pred_sbbox[0, 20, 20, 0, 8])
+    print(pred_sbbox[0, 0, 0, 0, 0], pred_sbbox[0, 0, 0, 0, 1], pred_sbbox[0, 0, 0, 0, 2], pred_sbbox[0, 0, 0, 0, 3], pred_sbbox[0, 0, 0, 0, 4], 
+     pred_sbbox[0, 0, 0, 0, 5], pred_sbbox[0, 0, 0, 0, 6], pred_sbbox[0, 0, 0, 0, 7], pred_sbbox[0, 0, 0, 0, 8])
+    print(in_img_file)
     num_classes = 4
     score_thresh = 0.6
     iou_type = 'iou' #yolov4:diou, else giou

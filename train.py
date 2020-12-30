@@ -13,8 +13,9 @@ from core.yolov3 import YOLOV3
 from core.yolov4 import YOLOV4
 from core.yolov5 import YOLOV5
 from core.config import cfg
-
+import get_time_util
 import tensorflow
+
 print('tensorflow.version=', tensorflow.__version__)
 if tensorflow.__version__.startswith('1.'):
     import tensorflow as tf
@@ -37,19 +38,19 @@ class YoloTrain(object):
         self.warmup_periods = cfg.TRAIN.WARMUP_EPOCHS
         self.initial_weight = cfg.TRAIN.INITIAL_WEIGHT
         
-        self.ckpt_path = cfg.TRAIN.CKPT_PATH        
+        self.ckpt_path = cfg.TRAIN.CKPT_PATH + get_time_util.get_last_time()        
         if not os.path.exists(self.ckpt_path):
             os.makedirs(self.ckpt_path)
-        
+        else:
+            print('self.ckpt_path exists， need remove? ')
+            input()
+            shutil.rmtree(self.ckpt_path)
+            #os.removedirs(self.ckpt_path)
         self.time = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
         self.moving_ave_decay = cfg.YOLO.MOVING_AVE_DECAY
         self.max_bbox_per_scale = 150
 
-        self.log_path = ('log/%s' % net_type)
-        if os.path.exists(self.log_path):
-            shutil.rmtree(self.log_path)
-            #os.removedirs(self.log_path)
-        os.makedirs(self.log_path)
+        self.log_path = self.ckpt_path #('log/%s' % net_type)
 
         self.trainset = Dataset('train', self.net_type)
         self.testset = Dataset('test', self.net_type)
@@ -93,7 +94,11 @@ class YoloTrain(object):
                 self.net_var = tf.global_variables()
                 self.iou_loss, self.conf_loss, self.prob_loss = self.model.compute_loss(self.label_sbbox, self.label_mbbox, self.label_lbbox,
                                                                                         self.true_sbboxes, self.true_mbboxes, self.true_lbboxes)
-                self.loss = self.iou_loss + self.conf_loss + self.prob_loss
+
+                lambda_iou = 1
+                lambda_conf = 0.01
+                lambda_prob = 1
+                self.loss = lambda_iou*self.iou_loss + lambda_conf*self.conf_loss + lambda_prob*self.prob_loss
             
             elif self.net_type == 'yolov4' or self.net_type == 'yolov5':
                 iou_use = 1  # (0, 1, 2) ==> (giou_loss, diou_loss, ciou_loss)
@@ -229,7 +234,7 @@ class YoloTrain(object):
             train_epoch_loss, test_epoch_loss = np.mean(train_epoch_loss), np.mean(test_epoch_loss)
             train_epoch_loss = np.mean(train_epoch_loss)
             
-            ckpt_file = os.path.join(self.ckpt_path, 'social_%s_test-loss=%.4f.ckpt' % (self.net_type, test_epoch_loss))
+            ckpt_file = os.path.join(self.ckpt_path, 'qixing_%s_test-loss=%.4f.ckpt' % (self.net_type, test_epoch_loss))
             log_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             if saving == 0.0:
                 saving = train_epoch_loss
@@ -246,14 +251,12 @@ class YoloTrain(object):
 
 
 if __name__ == '__main__':
-    
     argv = sys.argv
     if len(argv) < 3:
         print('usage: python train.py gpu_id net_type(yolov5/yolov4/yolov3/tiny)')
         sys.exit()
-
     
-    gpu_id = '' #argv[1]
+    gpu_id = argv[1]
     net_type = argv[2]
     print('train gpu_id=%s, net_type=%s' % (gpu_id, net_type))
 
