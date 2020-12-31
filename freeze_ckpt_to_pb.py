@@ -22,7 +22,7 @@ if __name__ == "__main__":
     """
     gpu_id = '0' #argv[1]
     net_type = 'yolov3' #argv[2]
-    ckpt_file = 'checkpoint-v2/social_yolov3_test-loss=56.9129.ckpt-2' #argv[3]
+    ckpt_file = 'checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=7.3643.ckpt-31' #'checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567' #argv[3]
     if not os.path.exists(ckpt_file + '.index'):
         print('freeze_ckpt_to_pb ckpt_file=', ckpt_file, ' not exist')
         sys.exit()
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         input_data = tf.placeholder(dtype=tf.float32, name='input_data')
 
     if net_type == 'yolov3':
-        model = YOLOV3(input_data, trainable=False)
+        model = YOLOV3(input_data, trainable=False, freeze_pb=True)
     elif net_type == 'yolov4':
         model = YOLOV4(input_data, trainable=False)
     elif net_type == 'yolov5':

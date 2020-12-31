@@ -38,7 +38,7 @@ class YoloTrain(object):
         self.warmup_periods = cfg.TRAIN.WARMUP_EPOCHS
         self.initial_weight = cfg.TRAIN.INITIAL_WEIGHT
         
-        self.ckpt_path = cfg.TRAIN.CKPT_PATH + get_time_util.get_last_time()        
+        self.ckpt_path = cfg.TRAIN.CKPT_PATH + '-' + get_time_util.get_last_time()        
         if not os.path.exists(self.ckpt_path):
             os.makedirs(self.ckpt_path)
         else:
@@ -182,7 +182,7 @@ class YoloTrain(object):
             print('=> Restoring weights from: %s ... ' % self.initial_weight)
             self.loader.restore(self.sess, self.initial_weight)
         except:
-            print('=> %s does not exist !!!' % self.initial_weight)
+            print('=> restore failed... %s !!!' % self.initial_weight)
             print('=> Now it starts to train YOLO-%s from scratch ...' % self.net_type)
             self.first_stage_epochs = 0
 
@@ -214,7 +214,8 @@ class YoloTrain(object):
 
                 train_epoch_loss.append(train_step_loss)
                 self.summary_writer.add_summary(summary, global_step_val)
-                pbar.set_description('train loss: %.2f' %train_step_loss)
+                print('global_step_val', global_step_val, type(global_step_val))
+                pbar.set_description('train loss: %.1f - %.2f' %(global_step_val, train_step_loss))
 
             for test_data in self.testset:
                 if net_type == 'tiny':

@@ -15,7 +15,8 @@ else:
 
 
 class YOLOV3(object):
-    def __init__(self, input_data, trainable):
+    def __init__(self, input_data, trainable, freeze_pb=False):
+        self.freeze_pb = freeze_pb
         self.net_type = cfg.YOLO.NET_TYPE
         self.trainable = trainable
         self.classes = utils.read_class_names(cfg.YOLO.CLASSES)
@@ -231,12 +232,34 @@ class YOLOV3(object):
         batch_size = conv_shape[0]
         output_size = conv_shape[1]
         anchor_per_scale = len(anchors)
+        pre_dim = [batch_size, output_size, output_size]
+        conv_raw_dxdy = tf.slice(conv_output, begin=[0,0,0,0], size=pre_dim + [anchor_per_scale*2])
+        conv_raw_dwdh = tf.slice(conv_output, begin=[0,0,0,anchor_per_scale*2], size=pre_dim + [anchor_per_scale*2])
+        conv_raw_conf = tf.slice(conv_output, begin=[0,0,0,anchor_per_scale*4], size=pre_dim + [anchor_per_scale])
+        conv_raw_prob = tf.slice(conv_output, begin=[0,0,0,anchor_per_scale*5], size=pre_dim + [anchor_per_scale*self.num_class])
+        if self.freeze_pb:
+            conv_raw_dxdy = tf.reshape(conv_raw_dxdy, (output_size, output_size, anchor_per_scale, 2))
+            conv_raw_dwdh = tf.reshape(conv_raw_dwdh, (output_size, output_size, anchor_per_scale, 2))
+            conv_raw_conf = tf.reshape(conv_raw_conf, (output_size, output_size, anchor_per_scale, 1))
+            conv_raw_prob = tf.reshape(conv_raw_prob, (output_size, output_size, anchor_per_scale, self.num_class))
+        else: 
+            conv_raw_dxdy = tf.reshape(conv_raw_dxdy, (batch_size, output_size, output_size, anchor_per_scale, 2))
+            conv_raw_dwdh = tf.reshape(conv_raw_dwdh, (batch_size, output_size, output_size, anchor_per_scale, 2))
+            conv_raw_conf = tf.reshape(conv_raw_conf, (batch_size, output_size, output_size, anchor_per_scale, 1))
+            conv_raw_prob = tf.reshape(conv_raw_prob, (batch_size, output_size, output_size, anchor_per_scale, self.num_class))
+        # conv_output = tf.reshape(conv_output, (batch_size, output_size, output_size, anchor_per_scale, 5 + self.num_class))
+        # conv_raw_dxdy = conv_output[:, :, :, :, 0:2] #strided_slice
+        # conv_raw_dwdh = conv_output[:, :, :, :, 2:4]
+        # conv_raw_conf = conv_output[:, :, :, :, 4:5]
+        # conv_raw_prob = conv_output[:, :, :, :, 5: ]
 
-        conv_output = tf.reshape(conv_output, (batch_size, output_size, output_size, anchor_per_scale, 5 + self.num_class))
-        conv_raw_dxdy = conv_output[:, :, :, :, 0:2]
-        conv_raw_dwdh = conv_output[:, :, :, :, 2:4]
-        conv_raw_conf = conv_output[:, :, :, :, 4:5]
-        conv_raw_prob = conv_output[:, :, :, :, 5: ]
+        #conv_raw_dxdy, conv_raw_dwdh, conv_raw_conf, conv_raw_prob = tf.split(conv_output, [2, 2, 1, self.num_class], axis=4)
+
+        # pre_dim = [batch_size, output_size, output_size, anchor_per_scale]
+        # conv_raw_dxdy = tf.slice(conv_output, begin=[0,0,0,0,0], size=pre_dim + [2])
+        # conv_raw_dwdh = tf.slice(conv_output, begin=[0,0,0,0,2], size=pre_dim + [2])
+        # conv_raw_conf = tf.slice(conv_output, begin=[0,0,0,0,4], size=pre_dim + [1])
+        # conv_raw_prob = tf.slice(conv_output, begin=[0,0,0,0,5], size=pre_dim + [self.num_class])
 
         y = tf.tile(tf.range(output_size, dtype=tf.int32)[:, tf.newaxis], [1, output_size])
         x = tf.tile(tf.range(output_size, dtype=tf.int32)[tf.newaxis, :], [output_size, 1])
@@ -244,7 +267,8 @@ class YOLOV3(object):
         xy_grid = tf.concat([x[:, :, tf.newaxis], y[:, :, tf.newaxis]], axis=-1)
         xy_grid = tf.tile(xy_grid[tf.newaxis, :, :, tf.newaxis, :], [batch_size, 1, 1, anchor_per_scale, 1])
         xy_grid = tf.cast(xy_grid, tf.float32)
-
+        if self.freeze_pb:
+            xy_grid = tf.reshape(xy_grid, (output_size, output_size, anchor_per_scale, 2))
         pred_xy = (tf.sigmoid(conv_raw_dxdy) + xy_grid) * stride
         pred_wh = tf.exp(conv_raw_dwdh) * anchors * stride        
         pred_xywh = tf.concat([pred_xy, pred_wh], axis=-1)

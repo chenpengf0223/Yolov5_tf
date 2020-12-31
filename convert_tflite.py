@@ -3,17 +3,15 @@ from absl import app, flags, logging
 from absl.flags import FLAGS
 import numpy as np
 import cv2
-from core.yolov4 import YOLOV4
-from core.yolov3 import YOLOV3
-from core.yolov3_tiny import YOLOV3Tiny
 import core.utils as utils
 import os
 from core.config import cfg
 
 # flags.DEFINE_string('weights', './checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb', 'path to weights file')
-flags.DEFINE_string('weights', './checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567.pb', 'path to weights file')
+# flags.DEFINE_string('weights', './checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567.pb', 'path to weights file')
+flags.DEFINE_string('weights', './checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=7.3643.ckpt-31.pb', 'path to weights file')
 
-flags.DEFINE_string('output', './yolov3-416-fp32-qixing.tflite', 'path to output')
+flags.DEFINE_string('output', './yolov3-416-fp32-qixing-new.tflite', 'path to output')
 flags.DEFINE_integer('input_size', 416, 'path to output')
 flags.DEFINE_string('quantize_mode', 'float32', 'quantize mode (int8, float16, float32)')
 flags.DEFINE_string('dataset', "/Volumes/Elements/imgs/coco_dataset/coco/5k.txt", 'path to dataset')
@@ -115,10 +113,10 @@ def demo():
     pred_sbbox, pred_mbbox, pred_lbbox = output_data
     print(pred_sbbox.shape, pred_mbbox.shape, pred_lbbox.shape, img_size)
     
-    print(pred_sbbox[0, 20, 20, 0, 4], 
-     pred_sbbox[0, 20, 20, 0, 5], pred_sbbox[0, 20, 20, 0, 6], pred_sbbox[0, 20, 20, 0, 7], pred_sbbox[0, 20, 20, 0, 8])
-    print(pred_sbbox[0, 0, 0, 0, 0], pred_sbbox[0, 0, 0, 0, 1], pred_sbbox[0, 0, 0, 0, 2], pred_sbbox[0, 0, 0, 0, 3], pred_sbbox[0, 0, 0, 0, 4], 
-     pred_sbbox[0, 0, 0, 0, 5], pred_sbbox[0, 0, 0, 0, 6], pred_sbbox[0, 0, 0, 0, 7], pred_sbbox[0, 0, 0, 0, 8])
+    #print(pred_sbbox[0, 20, 20, 0, 4], 
+    # pred_sbbox[0, 20, 20, 0, 5], pred_sbbox[0, 20, 20, 0, 6], pred_sbbox[0, 20, 20, 0, 7], pred_sbbox[0, 20, 20, 0, 8])
+    #print(pred_sbbox[0, 0, 0, 0, 0], pred_sbbox[0, 0, 0, 0, 1], pred_sbbox[0, 0, 0, 0, 2], pred_sbbox[0, 0, 0, 0, 3], pred_sbbox[0, 0, 0, 0, 4], 
+    # pred_sbbox[0, 0, 0, 0, 5], pred_sbbox[0, 0, 0, 0, 6], pred_sbbox[0, 0, 0, 0, 7], pred_sbbox[0, 0, 0, 0, 8])
     print(in_img_file)
     num_classes = 4
     score_thresh = 0.6
