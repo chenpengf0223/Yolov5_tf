@@ -8,10 +8,12 @@ import os
 from core.config import cfg
 
 # flags.DEFINE_string('weights', './checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb', 'path to weights file')
-# flags.DEFINE_string('weights', './checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567.pb', 'path to weights file')
-flags.DEFINE_string('weights', './checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=7.3643.ckpt-31.pb', 'path to weights file')
+flags.DEFINE_string('weights', './checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567.pb', 'path to weights file')
+#flags.DEFINE_string('weights', './checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=6.7334.ckpt-65.pb', 'path to weights file')
+# flags.DEFINE_string('weights', './checkpoint-v2-2020-12-31_21-01-16/qixing_yolov3_test-loss=5.7523.ckpt-842.pb', 'path to weights file')
 
 flags.DEFINE_string('output', './yolov3-416-fp32-qixing-new.tflite', 'path to output')
+flags.DEFINE_string('output_cplus', './yolov3-416-fp32-qixing-cplus.tflite', 'path to output')
 flags.DEFINE_integer('input_size', 416, 'path to output')
 flags.DEFINE_string('quantize_mode', 'float32', 'quantize mode (int8, float16, float32)')
 flags.DEFINE_string('dataset', "/Volumes/Elements/imgs/coco_dataset/coco/5k.txt", 'path to dataset')
@@ -29,11 +31,8 @@ def representative_data_gen():
     else:
       continue
 
-def save_tflite():
+def save_tflite(input_arrays, output_arrays, out_tflite_model_name):
   # converter = tf.lite.TFLiteConverter.from_saved_model(FLAGS.weights)
-
-  input_arrays = ['input/input_data']
-  output_arrays = ['pred_sbbox/concat_2', 'pred_mbbox/concat_2', 'pred_lbbox/concat_2']
   # converter = tf.compat.v1.lite.TFLiteConverter.from_frozen_graph(
   #         graph_def_file, input_arrays, output_arrays)
   converter = tf.compat.v1.lite.TFLiteConverter.from_frozen_graph(
@@ -51,13 +50,12 @@ def save_tflite():
     converter.representative_dataset = representative_data_gen
 
   tflite_model = converter.convert()
-  open(FLAGS.output, 'wb').write(tflite_model)
-
-  logging.info("model saved to: {}".format(FLAGS.output))
+  open(out_tflite_model_name, 'wb').write(tflite_model)
+  logging.info("model saved to: {}".format(out_tflite_model_name))
 
 def demo():
-  img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test' #argv[3]
-  # img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/zhibeidangao/test-z' #argv[3]
+  # img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test' #argv[3]
+  img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/zhibeidangao/test-z' #argv[3]
   out_path = 'det_out-tflite-12-30' #argv[4]
   if not os.path.exists(out_path):
     os.makedirs(out_path)
@@ -79,7 +77,7 @@ def demo():
     print(files[0])
     for tp_f in files[2]:
       img_files.append(files[0] + '/' + tp_f)
-    input()
+    # input()
   for idx, in_img_file in enumerate(img_files):
     #print('idx=', idx, 'in_img_file=', in_img_file)
     if not os.path.exists(in_img_file):
@@ -108,7 +106,8 @@ def demo():
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     output_data = [interpreter.get_tensor(output_details[i]['index']) for i in range(len(output_details))]
-
+    print('run over.')
+    # input()
     print(type(output_data))
     pred_sbbox, pred_mbbox, pred_lbbox = output_data
     print(pred_sbbox.shape, pred_mbbox.shape, pred_lbbox.shape, img_size)
@@ -149,7 +148,17 @@ def demo():
     print('idx=', idx, 'in_img_file=', in_img_file, 'out_file=', out_file)
 
 def main(_argv):
-  save_tflite()
+  input_arrays = ['input/input_data']
+  output_arrays = ['pred_sbbox/concat_2', 'pred_mbbox/concat_2', 'pred_lbbox/concat_2']
+  # output_arrays = ["conv_sbbox/BiasAdd", "conv_mbbox/BiasAdd", "conv_lbbox/BiasAdd"]
+  save_tflite(input_arrays, output_arrays, FLAGS.output)
+  print('convert done...')
+  input_arrays = ['input/input_data']
+  output_arrays_for_CPlus = ['pred_lbbox/Exp', 'pred_lbbox/Sigmoid', 'pred_lbbox/Sigmoid_1', 'pred_lbbox/Sigmoid_2', 
+   'pred_mbbox/Exp', 'pred_mbbox/Sigmoid', 'pred_mbbox/Sigmoid_1', 'pred_mbbox/Sigmoid_2',
+   'pred_sbbox/Exp', 'pred_sbbox/Sigmoid', 'pred_sbbox/Sigmoid_1', 'pred_sbbox/Sigmoid_2']
+  save_tflite(input_arrays, output_arrays_for_CPlus, FLAGS.output_cplus)
+
   demo()
 
 if __name__ == '__main__':

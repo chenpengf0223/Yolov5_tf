@@ -22,7 +22,9 @@ if __name__ == "__main__":
     """
     gpu_id = '0' #argv[1]
     net_type = 'yolov3' #argv[2]
-    ckpt_file = 'checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=7.3643.ckpt-31' #'checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567' #argv[3]
+    # ckpt_file = 'checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=6.7334.ckpt-65' #
+    ckpt_file = 'checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567' #argv[3]
+    # ckpt_file = 'checkpoint-v2-2020-12-31_21-01-16/qixing_yolov3_test-loss=5.7523.ckpt-842'
     if not os.path.exists(ckpt_file + '.index'):
         print('freeze_ckpt_to_pb ckpt_file=', ckpt_file, ' not exist')
         sys.exit()
@@ -33,11 +35,12 @@ if __name__ == "__main__":
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
     output_node_names = ["input/input_data", "pred_sbbox/concat_2", "pred_mbbox/concat_2", "pred_lbbox/concat_2"]
+    #output_node_names = ["input/input_data", "conv_sbbox/BiasAdd", "conv_mbbox/BiasAdd", "conv_lbbox/BiasAdd"]
     with tf.name_scope('input'):
         input_data = tf.placeholder(dtype=tf.float32, name='input_data')
 
     if net_type == 'yolov3':
-        model = YOLOV3(input_data, trainable=False, freeze_pb=True)
+        model = YOLOV3(input_data, trainable=False, freeze_pb=False)
     elif net_type == 'yolov4':
         model = YOLOV4(input_data, trainable=False)
     elif net_type == 'yolov5':
