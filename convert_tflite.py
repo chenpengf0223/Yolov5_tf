@@ -8,12 +8,15 @@ import os
 from core.config import cfg
 
 # flags.DEFINE_string('weights', './checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb', 'path to weights file')
-flags.DEFINE_string('weights', './checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567.pb', 'path to weights file')
+# flags.DEFINE_string('weights', './checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567.pb', 'path to weights file')
 #flags.DEFINE_string('weights', './checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=6.7334.ckpt-65.pb', 'path to weights file')
 # flags.DEFINE_string('weights', './checkpoint-v2-2020-12-31_21-01-16/qixing_yolov3_test-loss=5.7523.ckpt-842.pb', 'path to weights file')
+#flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=3.1826.ckpt-28.pb', 'path to weights file')
+flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.8997.ckpt-409.pb', 'path to weights file')
+#flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.5758.ckpt-669.pb', 'path to weights file')
 
-flags.DEFINE_string('output', './yolov3-416-fp32-qixing-new.tflite', 'path to output')
-flags.DEFINE_string('output_cplus', './yolov3-416-fp32-qixing-cplus.tflite', 'path to output')
+flags.DEFINE_string('output', './1.8997-409-detecor.tflite', 'path to output')
+flags.DEFINE_string('output_cplus', './1.8997-409-detecor-cplus.tflite', 'path to output')
 flags.DEFINE_integer('input_size', 416, 'path to output')
 flags.DEFINE_string('quantize_mode', 'float32', 'quantize mode (int8, float16, float32)')
 flags.DEFINE_string('dataset', "/Volumes/Elements/imgs/coco_dataset/coco/5k.txt", 'path to dataset')
@@ -54,9 +57,10 @@ def save_tflite(input_arrays, output_arrays, out_tflite_model_name):
   logging.info("model saved to: {}".format(out_tflite_model_name))
 
 def demo():
-  # img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test' #argv[3]
-  img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/zhibeidangao/test-z' #argv[3]
-  out_path = 'det_out-tflite-12-30' #argv[4]
+  img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test' #argv[3]
+  # img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/zhibeidangao/test-z' #argv[3]
+  # out_path = 'det_out-tflite-1.5758.ckpt-669' #argv[4]
+  out_path = 'det_out-tflite-1.8997.ckpt-409-only-middle' #argv[4]
   if not os.path.exists(out_path):
     os.makedirs(out_path)
   if not os.path.exists(img_path_file):
@@ -121,11 +125,15 @@ def demo():
     score_thresh = 0.6
     iou_type = 'iou' #yolov4:diou, else giou
     iou_thresh = 0.3
-
+    
     pred_bbox = np.concatenate([np.reshape(pred_sbbox, (-1, 5 + num_classes)),
                                               np.reshape(pred_mbbox, (-1, 5 + num_classes)),
                                               np.reshape(pred_lbbox, (-1, 5 + num_classes))], axis=0)
-
+    '''
+    pred_bbox = np.concatenate([
+                                np.reshape(pred_mbbox, (-1, 5 + num_classes))
+                                ], axis=0)
+    '''
     bboxes = utils.postprocess_boxes(pred_bbox, img_size, FLAGS.input_size, score_thresh)
     bboxes = utils.nms(bboxes, iou_type, iou_thresh, method='nms')
     score = 0
@@ -150,13 +158,13 @@ def demo():
 def main(_argv):
   input_arrays = ['input/input_data']
   output_arrays = ['pred_sbbox/concat_2', 'pred_mbbox/concat_2', 'pred_lbbox/concat_2']
-  # output_arrays = ["conv_sbbox/BiasAdd", "conv_mbbox/BiasAdd", "conv_lbbox/BiasAdd"]
   save_tflite(input_arrays, output_arrays, FLAGS.output)
   print('convert done...')
   input_arrays = ['input/input_data']
-  output_arrays_for_CPlus = ['pred_lbbox/Exp', 'pred_lbbox/Sigmoid', 'pred_lbbox/Sigmoid_1', 'pred_lbbox/Sigmoid_2', 
-   'pred_mbbox/Exp', 'pred_mbbox/Sigmoid', 'pred_mbbox/Sigmoid_1', 'pred_mbbox/Sigmoid_2',
-   'pred_sbbox/Exp', 'pred_sbbox/Sigmoid', 'pred_sbbox/Sigmoid_1', 'pred_sbbox/Sigmoid_2']
+  # output_arrays_for_CPlus = ['pred_lbbox/Exp', 'pred_lbbox/Sigmoid', 'pred_lbbox/Sigmoid_1', 'pred_lbbox/Sigmoid_2', 
+  #  'pred_mbbox/Exp', 'pred_mbbox/Sigmoid', 'pred_mbbox/Sigmoid_1', 'pred_mbbox/Sigmoid_2',
+  #  'pred_sbbox/Exp', 'pred_sbbox/Sigmoid', 'pred_sbbox/Sigmoid_1', 'pred_sbbox/Sigmoid_2']
+  output_arrays_for_CPlus = ["conv_sbbox/BiasAdd", "conv_mbbox/BiasAdd", "conv_lbbox/BiasAdd"]
   save_tflite(input_arrays, output_arrays_for_CPlus, FLAGS.output_cplus)
 
   demo()
