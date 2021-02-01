@@ -164,8 +164,23 @@ class Dataset(object):
 
 
     def parse_annotation(self, annotation):
+        # print('annotation', annotation)
         line = annotation.split()
-        image_path = line[0]
+        # print('line', line)
+        str_tp = line[1]
+        if str_tp.find('.jpg') >= 0:
+            # print('line[1]: ', line[1])
+            line[0] = line[0] + ' ' + line[1]
+            len_tp = len(line)
+            for i in range(1, len_tp - 1): 
+                line[i] = line[i + 1]
+            del line[-1]
+            # print('line af:', line)
+            
+        # image_path = line[0]
+        image_path_tp = line[0]
+        # image_path = ''.join(x.decode('utf-8') for x in image_path_tp.split())
+        image_path = str(image_path_tp)
         if not os.path.exists(image_path):
             raise KeyError("%s does not exist ... " % image_path)
         

@@ -12,11 +12,14 @@ from core.config import cfg
 #flags.DEFINE_string('weights', './checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=6.7334.ckpt-65.pb', 'path to weights file')
 # flags.DEFINE_string('weights', './checkpoint-v2-2020-12-31_21-01-16/qixing_yolov3_test-loss=5.7523.ckpt-842.pb', 'path to weights file')
 #flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=3.1826.ckpt-28.pb', 'path to weights file')
-flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.8997.ckpt-409.pb', 'path to weights file')
+#flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.8997.ckpt-409.pb', 'path to weights file')
 #flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.5758.ckpt-669.pb', 'path to weights file')
+flags.DEFINE_string('weights', './checkpoint-v2-2021-01-28_16-02-28/qixing_yolov3_test-loss=3.5855.ckpt-382.pb', 'path to weights file')
 
-flags.DEFINE_string('output', './1.8997-409-detecor.tflite', 'path to output')
-flags.DEFINE_string('output_cplus', './1.8997-409-detecor-cplus.tflite', 'path to output')
+#flags.DEFINE_string('output', './1.8997-409-detector.tflite', 'path to output')
+flags.DEFINE_string('output', './3.5855-382-detector.tflite', 'path to output')
+#flags.DEFINE_string('output_cplus', './1.8997-409-detector-cplus.tflite', 'path to output')
+flags.DEFINE_string('output_cplus', './3.5855-382-detector-cplus.tflite', 'path to output')
 flags.DEFINE_integer('input_size', 416, 'path to output')
 flags.DEFINE_string('quantize_mode', 'float32', 'quantize mode (int8, float16, float32)')
 flags.DEFINE_string('dataset', "/Volumes/Elements/imgs/coco_dataset/coco/5k.txt", 'path to dataset')
@@ -57,10 +60,12 @@ def save_tflite(input_arrays, output_arrays, out_tflite_model_name):
   logging.info("model saved to: {}".format(out_tflite_model_name))
 
 def demo():
-  img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test' #argv[3]
+  #img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test' #argv[3]
+  img_path_file = '/home/chenp/Yolov5_tf/data/dataset/test' #argv[3]
   # img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/zhibeidangao/test-z' #argv[3]
   # out_path = 'det_out-tflite-1.5758.ckpt-669' #argv[4]
-  out_path = 'det_out-tflite-1.8997.ckpt-409-only-middle' #argv[4]
+  #out_path = 'det_out-tflite-1.8997.ckpt-409-only-middle' #argv[4]
+  out_path = 'det_out-tflite-3.5855.ckpt-382--' #argv[4]
   if not os.path.exists(out_path):
     os.makedirs(out_path)
   if not os.path.exists(img_path_file):
@@ -121,7 +126,7 @@ def demo():
     #print(pred_sbbox[0, 0, 0, 0, 0], pred_sbbox[0, 0, 0, 0, 1], pred_sbbox[0, 0, 0, 0, 2], pred_sbbox[0, 0, 0, 0, 3], pred_sbbox[0, 0, 0, 0, 4], 
     # pred_sbbox[0, 0, 0, 0, 5], pred_sbbox[0, 0, 0, 0, 6], pred_sbbox[0, 0, 0, 0, 7], pred_sbbox[0, 0, 0, 0, 8])
     print(in_img_file)
-    num_classes = 4
+    num_classes = len(utils.read_class_names(cfg.YOLO.CLASSES)) #6 #4
     score_thresh = 0.6
     iou_type = 'iou' #yolov4:diou, else giou
     iou_thresh = 0.3
