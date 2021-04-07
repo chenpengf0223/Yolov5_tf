@@ -57,9 +57,10 @@ def parse_custom_annotation(data_path, anno_path, data_list_path):
                         new_str = ''
                         if enable_save_img:
                             img_s = cv2.imread(filename + '.jpg')
+                        is_anno_wrong = False
                         for obj in obj_list:
                             # if obj['name'] != folder:
-                            if obj['name'] != folder and obj['name'] != 'quqir' and obj['name'] != ' zaocanbao':
+                            if obj['name'] != folder and obj['name'] != 'quqir' and obj['name'] != ' zaocanbao' and obj['name'] != 'quqi ':
                                 print("obj['name'] != folder", obj['name'], folder)
                                 input()
                             box = obj['bndbox']
@@ -67,6 +68,14 @@ def parse_custom_annotation(data_path, anno_path, data_list_path):
                             x_max = box['xmax']
                             y_min = box['ymin']
                             y_max = box['ymax']
+                            if isinstance(x_min, int) and isinstance(y_min, int) and isinstance(x_max, int) and isinstance(y_max, int):
+                                print('box check is over.')
+                            else:
+                                print('box x_min y_min x_max y_max is wrong', x_max, x_max, x_max, x_max)
+                                print('press enter to skip this img.')
+                                input()
+                                is_anno_wrong = True
+                                break
                             if (x_min<0 or x_min>=img_w or y_min<0 or y_min>=img_h or 
                                 x_max<0 or x_max>=img_w or y_max<0 or y_max>=img_h):
                                 need_check = True
@@ -104,8 +113,12 @@ def parse_custom_annotation(data_path, anno_path, data_list_path):
                         if enable_save_img:
                             if need_check:
                                 cv2.imwrite(str(f_idx) + '-anno-check.jpg', img_s)
+                        if is_anno_wrong:
+                            print('skip this img because box x_min y_min x_max y_max is wrong.', file_cur)
+                            continue
                         if new_str == '':
                             print('new_str=empty, maybe missing box:', file_cur)
+                            print('press enter to skip this img.')
                             input()
                             continue
                         image_num += 1
@@ -123,20 +136,20 @@ def parse_custom_annotation(data_path, anno_path, data_list_path):
 
 if __name__ == "__main__":
     train_data_path_2007 = '/home/chenp/Yolov5_tf/data/dataset/train'
-    train_annotation_path = "/home/chenp/Yolov5_tf/train_annotation11.txt"
+    train_annotation_path = "/home/chenp/Yolov5_tf/train_annotation.txt"
     if os.path.exists(train_annotation_path):
         print('remove train annotation path...')
         input()
         os.remove(train_annotation_path)
-    train_data_list_path = './train111.txt'
+    train_data_list_path = './train.txt'
     
     test_data_path_2007 = '/home/chenp/Yolov5_tf/data/dataset/test'
-    test_annotation_path = "/home/chenp/Yolov5_tf/test_annotation11.txt"
+    test_annotation_path = "/home/chenp/Yolov5_tf/test_annotation.txt"
     if os.path.exists(test_annotation_path):
         print('remove test annotation path...')
         input()
         os.remove(test_annotation_path)
-    test_data_list_path = './test111.txt'
+    test_data_list_path = './test.txt'
 
     len_train = parse_custom_annotation(
         train_data_path_2007,

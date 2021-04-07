@@ -2,22 +2,33 @@ import shutil
 import os
 import glob
 import random
+import yolov4_config as cfg
 
 # train_dst_folder='/home/chenp/YOLOv4-pytorch/qixing-data/train'
 # test_dst_folder='/home/chenp/YOLOv4-pytorch/qixing-data/test'
 # new_dataset_folder='/home/chenp/YOLOv4-pytorch/qixing1214'
 
+# train_dst_folder='/home/chenp/Yolov5_tf/data/dataset/train'
+# test_dst_folder='/home/chenp/Yolov5_tf/data/dataset/test'
+# new_dataset_folder='/home/chenp/Yolov5_tf/data/dataset/data-0124'
+
 train_dst_folder='/home/chenp/Yolov5_tf/data/dataset/train'
 test_dst_folder='/home/chenp/Yolov5_tf/data/dataset/test'
-new_dataset_folder='/home/chenp/Yolov5_tf/data/dataset/data-0124'
-
+new_dataset_folder='/home/chenp/Yolov5_tf/data/dataset/data-0406'
 
 def add_new_data(new_dataset_folder,
     train_dst_folder, test_dst_folder,
     test_set_proportion=0.2):
-    class_name_list = ['zhibeidangao', 'qifeng', 'tusi', 'quqi', 'zaocanbao', 'dangaojuan']
+    # class_name_list = ['zhibeidangao', 'qifeng', 'tusi', 'quqi', 'zaocanbao', 'dangaojuan',
+    #  'danta', 'jichi', 'jichigen', 'jixiongrou', 'jimihua', 'manyuemeibinggan',
+    #  'peigen', 'niupai', 'shutiao', 'oubao']
+    # print('Please Confirm class_name_list: ', class_name_list)
+    # input()
+
+    class_name_list = cfg.Customer_DATA["CLASSES"]
     print('Please Confirm class_name_list: ', class_name_list)
     input()
+    
     add_folder_num = 0
     add_test_data_num = 0
     add_train_data_num = 0
