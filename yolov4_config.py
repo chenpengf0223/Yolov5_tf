@@ -44,14 +44,24 @@ VAL = {
 }
 
 Customer_DATA = {
-    "NUM": 6,  # your dataset number
+    "NUM": 16,  # your dataset number
     "CLASSES":
     ["zhibeidangao",
     "qifeng",
     "tusi",
     "quqi",
     "zaocanbao",
-    "dangaojuan"],  # your dataset class
+    "dangaojuan",
+    "danta",
+    "jichi",
+    "jichigen",
+    "jixiongrou",
+    "jimihua",
+    "manyuemeibinggan",
+    "peigen",
+    "niupai",
+    "shutiao",
+    "oubao"],  # your dataset class
 }
 
 VOC_DATA = {
