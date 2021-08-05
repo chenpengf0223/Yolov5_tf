@@ -16,6 +16,8 @@ train_dst_folder='/home/chenp/Yolov5_tf/data/dataset/train'
 test_dst_folder='/home/chenp/Yolov5_tf/data/dataset/test'
 new_dataset_folder='/home/chenp/Yolov5_tf/data/dataset/data-0406'
 
+bad_data_dst_folder='/data/bad_data'
+
 def add_new_data(new_dataset_folder,
     train_dst_folder, test_dst_folder,
     test_set_proportion=0.2):
@@ -41,7 +43,11 @@ def add_new_data(new_dataset_folder,
         print('train_dst_folder does not exist: ', train_dst_folder)
         input()
         return False, add_train_data_num, add_test_data_num
-
+    
+    if not os.path.exists(bad_data_dst_folder):
+        print('bad_data_dst_folder does not exist: ', bad_data_dst_folder)
+        os.makedirs(bad_data_dst_folder)
+    
     data_folder_list = os.listdir(new_dataset_folder)
     for root_sub_file in data_folder_list:
         folder_path = new_dataset_folder + '/' + root_sub_file
@@ -55,14 +61,27 @@ def add_new_data(new_dataset_folder,
             input()
             
         data_path_list = []
+        bad_data_path_list = []
         file_list = os.listdir(folder_path)
         for file_idx, file_path in enumerate(file_list):
             filename, file_type = os.path.splitext(folder_path + '/' + file_path)
-            if file_type == '.json' and os.path.exists(filename + '.jpg'):
-                img_path = filename + '.jpg'
-                data_path_list.append(
-                    {folder_path + '/' + file_path : img_path}
-                    )
+            if file_type == '.json':
+                if os.path.exists(filename + '.jpg'):
+                    img_path = filename + '.jpg'
+                    data_path_list.append(
+                        {folder_path + '/' + file_path : img_path}
+                        )
+                else:
+                    bad_data_path_list.append(folder_path + '/' + file_path)
+            elif file_type != '.json' and file_type != '.jpg':
+                bad_data_path_list.append(folder_path + '/' + file_path)
+            elif file_type == '.jpg':
+                if not os.path.exists(filename + '.json'):
+                    bad_data_path_list.append(folder_path + '/' + file_path)
+        for bad_data in bad_data_path_list:
+            print('Move bad data: ', bad_data, ' To: ', bad_data_dst_folder)
+            shutil.move(bad_data, bad_data_dst_folder)
+        
         test_set_size = int(test_set_proportion * len(data_path_list) + 0.5)
         testdata_path_list = random.sample(data_path_list, test_set_size)
         print(testdata_path_list)
