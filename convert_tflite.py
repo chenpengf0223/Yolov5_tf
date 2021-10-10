@@ -6,6 +6,8 @@ import cv2
 import core.utils as utils
 import os
 from core.config import cfg
+import get_time_util
+import data_stream_status_machine
 
 # flags.DEFINE_string('weights', './checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb', 'path to weights file')
 # flags.DEFINE_string('weights', './checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567.pb', 'path to weights file')
@@ -182,7 +184,21 @@ def main(_argv):
   demo()
 
 if __name__ == '__main__':
+    last_data_stream_status = '3'
+    current_data_stream_status = '4'
+    current_note_log = 'convert tflite.'
+    if not data_stream_status_machine.start_check(last_data_stream_status):
+        exit(1)
+    start_time = get_time_util.get_last_time()
+    print('Start converting tflite...')
+
     try:
         app.run(main)
     except SystemExit:
         pass
+    
+    print('Converting tflite done...')
+    end_time = get_time_util.get_last_time()
+    data_stream_status_machine.end_check(data_stream_status=current_data_stream_status,
+        note_log=current_note_log,
+        start_time=start_time, end_time=end_time)

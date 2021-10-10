@@ -15,6 +15,7 @@ from core.yolov5 import YOLOV5
 from core.config import cfg
 import get_time_util
 import tensorflow
+import data_stream_status_machine
 
 print('tensorflow.version=', tensorflow.__version__)
 if tensorflow.__version__.startswith('1.'):
@@ -252,6 +253,14 @@ class YoloTrain(object):
 
 
 if __name__ == '__main__':
+    last_data_stream_status = '1'
+    current_data_stream_status = '2'
+    current_note_log = 'training and evaluation.'
+    if not data_stream_status_machine.start_check(last_data_stream_status):
+        exit(1)
+    start_time = get_time_util.get_last_time()
+    print('Start training and evaluation...')
+
     argv = sys.argv
     if len(argv) < 3:
         print('usage: python train.py gpu_id net_type(yolov5/yolov4/yolov3/tiny)')
@@ -263,3 +272,9 @@ if __name__ == '__main__':
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     YoloTrain(net_type).train()
+
+    print('Training and evaluation done...')
+    end_time = get_time_util.get_last_time()
+    data_stream_status_machine.end_check(data_stream_status=current_data_stream_status,
+        note_log=current_note_log,
+        start_time=start_time, end_time=end_time)

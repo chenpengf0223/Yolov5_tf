@@ -4,7 +4,8 @@ import sys
 from core.yolov3 import YOLOV3
 from core.yolov4 import YOLOV4
 from core.yolov5 import YOLOV5
-
+import get_time_util
+import data_stream_status_machine
 import tensorflow
 if tensorflow.__version__.startswith('1.'):
     import tensorflow as tf
@@ -14,6 +15,14 @@ else:
 
 
 if __name__ == "__main__":
+    last_data_stream_status = '2'
+    current_data_stream_status = '3'
+    current_note_log = 'freeze ckpt to pb.'
+    if not data_stream_status_machine.start_check(last_data_stream_status):
+        exit(1)
+    start_time = get_time_util.get_last_time()
+    print('Start freezing ckpt to pb...')
+
     """
     argv = sys.argv
     if len(argv) < 5:
@@ -62,3 +71,10 @@ if __name__ == "__main__":
                                                                        output_node_names=output_node_names)
     with tf.gfile.GFile(pb_file, "wb") as f:
         f.write(converted_graph_def.SerializeToString())
+
+    
+    print('Freezing ckpt to pb done...')
+    end_time = get_time_util.get_last_time()
+    data_stream_status_machine.end_check(data_stream_status=current_data_stream_status,
+        note_log=current_note_log,
+        start_time=start_time, end_time=end_time)

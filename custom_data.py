@@ -8,7 +8,8 @@ from tqdm import tqdm
 import io
 import json
 import cv2
-
+import get_time_util
+import data_stream_status_machine
 
 def parse_custom_annotation(data_path, anno_path, data_list_path):
     """
@@ -135,6 +136,14 @@ def parse_custom_annotation(data_path, anno_path, data_list_path):
 
 
 if __name__ == "__main__":
+    last_data_stream_status = '0'
+    current_data_stream_status = '1'
+    current_note_log = 'custom data writing to list.'
+    if not data_stream_status_machine.start_check(last_data_stream_status):
+        exit(1)
+    start_time = get_time_util.get_last_time()
+    print('Start custome data writing to list...')
+    
     train_data_path_2007 = '/home/chenp/Yolov5_tf/data/dataset/train'
     train_annotation_path = "/home/chenp/Yolov5_tf/train_annotation.txt"
     if os.path.exists(train_annotation_path):
@@ -167,3 +176,9 @@ if __name__ == "__main__":
             len_train, len_test
         )
     )
+
+    print('Custom data writing to list done...')
+    end_time = get_time_util.get_last_time()
+    data_stream_status_machine.end_check(data_stream_status=current_data_stream_status,
+        note_log=current_note_log,
+        start_time=start_time, end_time=end_time)

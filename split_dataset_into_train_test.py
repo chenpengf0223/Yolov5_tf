@@ -3,6 +3,8 @@ import os
 import glob
 import random
 import yolov4_config as cfg
+import get_time_util
+import data_stream_status_machine
 
 # train_dst_folder='/home/chenp/YOLOv4-pytorch/qixing-data/train'
 # test_dst_folder='/home/chenp/YOLOv4-pytorch/qixing-data/test'
@@ -127,6 +129,14 @@ def add_new_data(new_dataset_folder,
     return True, add_train_data_num, add_test_data_num
 
 
+last_data_stream_status = '10'
+current_data_stream_status = '0'
+current_note_log = 'split dataset to train test.'
+if not data_stream_status_machine.start_check(last_data_stream_status):
+    exit(1)
+
+start_time = get_time_util.get_last_time()
+print('Start spliting dataset...')
 if add_new_data(new_dataset_folder=new_dataset_folder,
     train_dst_folder=train_dst_folder, test_dst_folder=test_dst_folder,
     test_set_proportion=0.2):
@@ -134,3 +144,8 @@ if add_new_data(new_dataset_folder=new_dataset_folder,
 else:
     print('add failed...')
     input()
+print('Spliting dataset done...')
+end_time = get_time_util.get_last_time()
+data_stream_status_machine.end_check(data_stream_status=current_data_stream_status,
+ note_log=current_note_log,
+ start_time=start_time, end_time=end_time)
