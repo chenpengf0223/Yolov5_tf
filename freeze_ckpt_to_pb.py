@@ -29,7 +29,7 @@ if __name__ == "__main__":
         print('usage: python freeze_ckpt_to_pb.py gpu_id net_type(yolov5/yolov4/yolov3) ckpt_file pb_file')
         sys.exit()
     """
-    gpu_id = '7' #argv[1]
+    gpu_id = '0' #argv[1]
     net_type = 'yolov3' #argv[2]
     # ckpt_file = 'checkpoint-v2-2020-12-31_13-26-59/qixing_yolov3_test-loss=6.7334.ckpt-65' #
     # ckpt_file = 'checkpoint-v2/qixing_yolov3_test-loss=1.5639.ckpt-567' #argv[3]
@@ -39,12 +39,24 @@ if __name__ == "__main__":
     # ckpt_file = 'checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.8997.ckpt-409'
     #ckpt_file = 'checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.5758.ckpt-669'
     #ckpt_file = 'checkpoint-v2-2021-01-28_16-02-28/qixing_yolov3_test-loss=3.5855.ckpt-382'
-    ckpt_file = 'checkpoint-v2-2021-04-08_14-14-48/qixing_yolov3_test-loss=4.9424.ckpt-653'
+    #ckpt_file = 'checkpoint-v2-2021-04-08_14-14-48/qixing_yolov3_test-loss=4.9424.ckpt-653'
+    f_in = open('./best-ckpt-path', 'r')
+    ckpt_file = f_in.readline()
+    f_in.close()
+
+    ckpt_file = ckpt_file.strip()
+    print('ckpt_file confirm: ', ckpt_file)
+    input()
     if not os.path.exists(ckpt_file + '.index'):
         print('freeze_ckpt_to_pb ckpt_file=', ckpt_file, ' not exist')
         sys.exit()
 
     pb_file = ckpt_file + '.pb' #argv[4]
+
+    #set config for weight pb path:
+    out_f = open('./weight-pb-path', 'w')
+    out_f.write(pb_file)
+    out_f.close() 
     print('freeze_ckpt_to_pb gpu_id=%s, net_type=%s, ckpt_file=%s, pb_file=%s' % (gpu_id, net_type, ckpt_file, pb_file))
     
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)

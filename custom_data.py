@@ -144,16 +144,16 @@ if __name__ == "__main__":
     start_time = get_time_util.get_last_time()
     print('Start custome data writing to list...')
     
-    train_data_path_2007 = '/home/chenp/Yolov5_tf/data/dataset/train'
-    train_annotation_path = "/home/chenp/Yolov5_tf/train_annotation.txt"
+    train_data_path_2007 = '/test-pipline/train'
+    train_annotation_path = "./train_annotation.txt"
     if os.path.exists(train_annotation_path):
         print('remove train annotation path...')
         input()
         os.remove(train_annotation_path)
     train_data_list_path = './train.txt'
     
-    test_data_path_2007 = '/home/chenp/Yolov5_tf/data/dataset/test'
-    test_annotation_path = "/home/chenp/Yolov5_tf/test_annotation.txt"
+    test_data_path_2007 = '/test-pipline/test'
+    test_annotation_path = "./test_annotation.txt"
     if os.path.exists(test_annotation_path):
         print('remove test annotation path...')
         input()

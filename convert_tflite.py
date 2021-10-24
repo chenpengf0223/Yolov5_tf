@@ -42,12 +42,12 @@ def representative_data_gen():
     else:
       continue
 
-def save_tflite(input_arrays, output_arrays, out_tflite_model_name):
-  # converter = tf.lite.TFLiteConverter.from_saved_model(FLAGS.weights)
+def save_tflite(input_arrays, output_arrays, weights_pb_path, out_tflite_model_name):
+  # converter = tf.lite.TFLiteConverter.from_saved_model(weights_pb_path)
   # converter = tf.compat.v1.lite.TFLiteConverter.from_frozen_graph(
   #         graph_def_file, input_arrays, output_arrays)
   converter = tf.compat.v1.lite.TFLiteConverter.from_frozen_graph(
-        FLAGS.weights, input_arrays, output_arrays, {input_arrays[0] :[1,FLAGS.input_size,FLAGS.input_size,3]})
+        weights_pb_path, input_arrays, output_arrays, {input_arrays[0] :[1,FLAGS.input_size,FLAGS.input_size,3]})
   if FLAGS.quantize_mode == 'float16':
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.target_spec.supported_types = [tf.compat.v1.lite.constants.FLOAT16]
@@ -167,19 +167,25 @@ def demo():
     print('idx=', idx, 'in_img_file=', in_img_file, 'out_file=', out_file)
 
 def main(_argv):
-  gpu_id = 7
+  gpu_id = 0
   os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
   input_arrays = ['input/input_data']
   output_arrays = ['pred_sbbox/concat_2', 'pred_mbbox/concat_2', 'pred_lbbox/concat_2']
-  save_tflite(input_arrays, output_arrays, FLAGS.output)
+  #get config for weight pb path:
+  in_f = open('./weight-pb-path', 'r')
+  weights_pb_path = in_f.readline()
+  in_f.close()
+  output_path = weights_pb_path + '-detector.tflite'
+  output_cplus_path = weights_pb_path + '-detector-cplus.tflite'
+  save_tflite(input_arrays, output_arrays, weights_pb_path, output_path)
   print('convert done...')
   input_arrays = ['input/input_data']
   # output_arrays_for_CPlus = ['pred_lbbox/Exp', 'pred_lbbox/Sigmoid', 'pred_lbbox/Sigmoid_1', 'pred_lbbox/Sigmoid_2', 
   #  'pred_mbbox/Exp', 'pred_mbbox/Sigmoid', 'pred_mbbox/Sigmoid_1', 'pred_mbbox/Sigmoid_2',
   #  'pred_sbbox/Exp', 'pred_sbbox/Sigmoid', 'pred_sbbox/Sigmoid_1', 'pred_sbbox/Sigmoid_2']
   output_arrays_for_CPlus = ["conv_sbbox/BiasAdd", "conv_mbbox/BiasAdd", "conv_lbbox/BiasAdd"]
-  save_tflite(input_arrays, output_arrays_for_CPlus, FLAGS.output_cplus)
+  save_tflite(input_arrays, output_arrays_for_CPlus, weights_pb_path, output_cplus_path)
 
   demo()
 

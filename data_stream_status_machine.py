@@ -14,15 +14,15 @@ def start_check(data_stream_status_idx):
 
 def end_check(data_stream_status, note_log, start_time, end_time):
     status_file = open(data_stream_file_path, 'w')
-    status_file.writeline(data_stream_status)
-    status_file.writeline('\n')
+    status_file.write(data_stream_status)
+    status_file.write('\n')
 
-    status_file.writeline('Status: ' + note_log)
-    status_file.writeline('\n')
+    status_file.write('Status: ' + note_log)
+    status_file.write('\n')
 
-    status_file.writeline('Start time: ' + start_time)
-    status_file.writeline('\n')
+    status_file.write('Start time: ' + start_time)
+    status_file.write('\n')
 
-    status_file.writeline('End time: ' + end_time)
-    status_file.writeline('\n')
+    status_file.write('End time: ' + end_time)
+    status_file.write('\n')
     status_file.close()

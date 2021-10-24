@@ -164,7 +164,7 @@ class YoloTrain(object):
 
         with tf.name_scope('loader_and_saver'):
             self.loader = tf.train.Saver(self.net_var)
-            self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1000)
+            self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=20)
 
         with tf.name_scope('summary'):
             tf.summary.scalar('learn_rate', self.learn_rate)
@@ -247,7 +247,11 @@ class YoloTrain(object):
                      (epoch, log_time, train_epoch_loss, test_epoch_loss, ckpt_file))
                 self.saver.save(self.sess, ckpt_file, global_step=epoch)
                 saving = train_epoch_loss
-            
+                
+                #set config for freeze ckpt to pb:
+                out_f = open('./best-ckpt-path', 'w')
+                out_f.write(ckpt_file + '-' + str(epoch))
+                out_f.close()
             else:
                 print('=> Epoch: %2d Time: %s Train loss: %.2f' % (epoch, log_time, train_epoch_loss))
 
@@ -272,8 +276,8 @@ if __name__ == '__main__':
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     YoloTrain(net_type).train()
-
     print('Training and evaluation done...')
+
     end_time = get_time_util.get_last_time()
     data_stream_status_machine.end_check(data_stream_status=current_data_stream_status,
         note_log=current_note_log,

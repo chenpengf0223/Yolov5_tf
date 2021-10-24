@@ -14,11 +14,11 @@ import data_stream_status_machine
 # test_dst_folder='/home/chenp/Yolov5_tf/data/dataset/test'
 # new_dataset_folder='/home/chenp/Yolov5_tf/data/dataset/data-0124'
 
-train_dst_folder='/home/chenp/Yolov5_tf/data/dataset/train'
-test_dst_folder='/home/chenp/Yolov5_tf/data/dataset/test'
-new_dataset_folder='/home/chenp/Yolov5_tf/data/dataset/data-0406'
+train_dst_folder='/test-pipline/train'
+test_dst_folder='/test-pipline/test'
+new_dataset_folder='/test-pipline/data'
 
-bad_data_dst_folder='/data/bad_data'
+bad_data_dst_folder='/test-pipline/bad_data'
 
 def add_new_data(new_dataset_folder,
     train_dst_folder, test_dst_folder,
@@ -136,6 +136,7 @@ if not data_stream_status_machine.start_check(last_data_stream_status):
     exit(1)
 
 start_time = get_time_util.get_last_time()
+
 print('Start spliting dataset...')
 if add_new_data(new_dataset_folder=new_dataset_folder,
     train_dst_folder=train_dst_folder, test_dst_folder=test_dst_folder,
@@ -145,6 +146,7 @@ else:
     print('add failed...')
     input()
 print('Spliting dataset done...')
+
 end_time = get_time_util.get_last_time()
 data_stream_status_machine.end_check(data_stream_status=current_data_stream_status,
  note_log=current_note_log,
