@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from easydict import EasyDict as edict
 import yolov4_config
+import sys
+import os
 
 class_label_path  = '../Yolov5_tf/class_label.txt'
 class_name_list = yolov4_config.Customer_DATA["CLASSES"]
@@ -51,7 +53,19 @@ __C.TRAIN.LEARN_RATE_END = 1e-6
 __C.TRAIN.WARMUP_EPOCHS = 10
 __C.TRAIN.FISRT_STAGE_EPOCHS = 100
 __C.TRAIN.SECOND_STAGE_EPOCHS = 1000
-__C.TRAIN.INITIAL_WEIGHT = 'checkpoint/yolov4_coco.ckpt' #'ckpts/yolov3_test-loss=24.0873.ckpt-27'
+
+#restore from the best ckpt
+f_in = open('./best-ckpt-path', 'r')
+ckpt_file = f_in.readline()
+f_in.close()
+ckpt_file = ckpt_file.strip()
+print('ckpt_file confirm: ', ckpt_file)
+#input()
+if not os.path.exists(ckpt_file + '.index'):
+    print('freeze_ckpt_to_pb ckpt_file=', ckpt_file, ' not exist')
+    sys.exit()
+__C.TRAIN.INITIAL_WEIGHT = ckpt_file #'checkpoint/yolov4_coco.ckpt' #'ckpts/yolov3_test-loss=24.0873.ckpt-27'
+
 __C.TRAIN.CKPT_PATH = 'checkpoint-v2' #'ckpts'
 
 

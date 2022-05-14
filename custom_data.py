@@ -71,8 +71,14 @@ def parse_custom_annotation(data_path, anno_path, data_list_path):
                             y_max = box['ymax']
                             if isinstance(x_min, int) and isinstance(y_min, int) and isinstance(x_max, int) and isinstance(y_max, int):
                                 print('box check is over.')
+                            elif isinstance(x_min, float) and isinstance(y_min, float) and isinstance(x_max, float) and isinstance(y_max, float):
+                                print('box check is over.')
+                                x_min = int(x_min)
+                                x_max = int(x_max)
+                                y_min = int(y_min)
+                                y_max = int(y_max)
                             else:
-                                print('box x_min y_min x_max y_max is wrong', x_max, x_max, x_max, x_max)
+                                print('box x_min y_min x_max y_max is wrong', x_min, y_min, x_max, y_max)
                                 print('press enter to skip this img.')
                                 input()
                                 is_anno_wrong = True
@@ -144,7 +150,8 @@ if __name__ == "__main__":
     start_time = get_time_util.get_last_time()
     print('Start custome data writing to list...')
     
-    train_data_path_2007 = '/test-pipline/train'
+    #train_data_path_2007 = '/home/haishi/suanfa/auto_train/train'
+    train_data_path_2007 = '/home/haishi/suanfa/20220505data/dataset/train'
     train_annotation_path = "./train_annotation.txt"
     if os.path.exists(train_annotation_path):
         print('remove train annotation path...')
@@ -152,7 +159,8 @@ if __name__ == "__main__":
         os.remove(train_annotation_path)
     train_data_list_path = './train.txt'
     
-    test_data_path_2007 = '/test-pipline/test'
+    #test_data_path_2007 = '/home/haishi/suanfa/auto_train/test'
+    test_data_path_2007 = '/home/haishi/suanfa/20220505data/dataset/test'
     test_annotation_path = "./test_annotation.txt"
     if os.path.exists(test_annotation_path):
         print('remove test annotation path...')

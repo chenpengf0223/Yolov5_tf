@@ -17,14 +17,17 @@ import data_stream_status_machine
 #flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.8997.ckpt-409.pb', 'path to weights file')
 #flags.DEFINE_string('weights', './checkpoint-v2-2021-01-04_17-52-45/qixing_yolov3_test-loss=1.5758.ckpt-669.pb', 'path to weights file')
 #flags.DEFINE_string('weights', './checkpoint-v2-2021-01-28_16-02-28/qixing_yolov3_test-loss=3.5855.ckpt-382.pb', 'path to weights file')
-flags.DEFINE_string('weights', './checkpoint-v2-2021-04-08_14-14-48/qixing_yolov3_test-loss=4.9424.ckpt-653.pb', 'path to weights file')
+#flags.DEFINE_string('weights', './checkpoint-v2-2021-04-08_14-14-48/qixing_yolov3_test-loss=4.9424.ckpt-653.pb', 'path to weights file')
+flags.DEFINE_string('weights', './checkpoint-v2-2022-05-08_15-48-47/qixing_yolov3_test-loss=3.0047.ckpt-976.pb', 'path to weights file')
 
 #flags.DEFINE_string('output', './1.8997-409-detector.tflite', 'path to output')
 #flags.DEFINE_string('output', './3.5855-382-detector.tflite', 'path to output')
-flags.DEFINE_string('output', './4.9424-653-detector.tflite', 'path to output')
+#flags.DEFINE_string('output', './4.9424-653-detector.tflite', 'path to output')
+flags.DEFINE_string('output', './3.0047-976-detector.tflite', 'path to output')
 #flags.DEFINE_string('output_cplus', './1.8997-409-detector-cplus.tflite', 'path to output')
 #flags.DEFINE_string('output_cplus', './3.5855-382-detector-cplus.tflite', 'path to output')
-flags.DEFINE_string('output_cplus', './4.9424-653-detector-cplus.tflite', 'path to output')
+#flags.DEFINE_string('output_cplus', './4.9424-653-detector-cplus.tflite', 'path to output')
+flags.DEFINE_string('output_cplus', './3.0047-976-detector-cplus.tflite', 'path to output')
 flags.DEFINE_integer('input_size', 416, 'path to output')
 flags.DEFINE_string('quantize_mode', 'float32', 'quantize mode (int8, float16, float32)')
 flags.DEFINE_string('dataset', "/Volumes/Elements/imgs/coco_dataset/coco/5k.txt", 'path to dataset')
@@ -64,20 +67,22 @@ def save_tflite(input_arrays, output_arrays, weights_pb_path, out_tflite_model_n
   open(out_tflite_model_name, 'wb').write(tflite_model)
   logging.info("model saved to: {}".format(out_tflite_model_name))
 
-def demo():
+def demo(model_path):
   #img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test' #argv[3]
   #img_path_file = '/home/chenp/Yolov5_tf/data/dataset/test' #argv[3]
-  img_path_file = './data/dataset/test' #argv[3]
+  #img_path_file = './data/dataset/test' #argv[3]
+  img_path_file = '/home/haishi/suanfa/20220505data/dataset/test' #argv[3]
   # img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/zhibeidangao/test-z' #argv[3]
   # out_path = 'det_out-tflite-1.5758.ckpt-669' #argv[4]
   #out_path = 'det_out-tflite-1.8997.ckpt-409-only-middle' #argv[4]
-  out_path = 'det_out-tflite-4.9424-653' #argv[4]
+  #out_path = 'det_out-tflite-4.9424-653' #argv[4]
+  out_path = 'det_out-tflite-'+model_path.split('/')[-1]
   if not os.path.exists(out_path):
     os.makedirs(out_path)
   if not os.path.exists(img_path_file):
       print('img_path_file=%s not exist' % img_path_file)
       sys.exit()
-  interpreter = tf.lite.Interpreter(model_path=FLAGS.output)
+  interpreter = tf.lite.Interpreter(model_path=model_path) #FLAGS.output
   interpreter.allocate_tensors()
   logging.info('tflite model loaded')
 
@@ -187,7 +192,7 @@ def main(_argv):
   output_arrays_for_CPlus = ["conv_sbbox/BiasAdd", "conv_mbbox/BiasAdd", "conv_lbbox/BiasAdd"]
   save_tflite(input_arrays, output_arrays_for_CPlus, weights_pb_path, output_cplus_path)
 
-  demo()
+  #demo(output_path)
 
 if __name__ == '__main__':
     last_data_stream_status = '3'
