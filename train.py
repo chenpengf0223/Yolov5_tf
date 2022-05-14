@@ -236,24 +236,25 @@ class YoloTrain(object):
             train_epoch_loss, test_epoch_loss = np.mean(train_epoch_loss), np.mean(test_epoch_loss)
             train_epoch_loss = np.mean(train_epoch_loss)
             
-            ckpt_file = os.path.join(self.ckpt_path, 'qixing_%s_test-loss=%.4f.ckpt' % (self.net_type, test_epoch_loss))
+            ckpt_file = os.path.join(self.ckpt_path, 'haishi_test-loss=%.4f.ckpt' %  test_epoch_loss)
             log_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             if saving == 0.0:
-                saving = train_epoch_loss
-                print('=> Epoch: %2d Time: %s Train loss: %.2f' % (epoch, log_time, train_epoch_loss))
+                saving = test_epoch_loss #train_epoch_loss
+                print('=> Epoch: %2d Time: %s Train loss: %.2f, Test loss: %.2f' % (epoch, log_time, train_epoch_loss, test_epoch_loss))
             
-            elif saving > train_epoch_loss:
+            elif saving > test_epoch_loss: #train_epoch_loss
                 print('=> Epoch: %2d Time: %s Train loss: %.2f Test loss: %.2f Saving %s ...' % 
                      (epoch, log_time, train_epoch_loss, test_epoch_loss, ckpt_file))
                 self.saver.save(self.sess, ckpt_file, global_step=epoch)
-                saving = train_epoch_loss
+                #saving = train_epoch_loss
+                saving = test_epoch_loss
                 
                 #set config for freeze ckpt to pb:
                 out_f = open('./best-ckpt-path', 'w')
                 out_f.write(ckpt_file + '-' + str(epoch))
                 out_f.close()
             else:
-                print('=> Epoch: %2d Time: %s Train loss: %.2f' % (epoch, log_time, train_epoch_loss))
+                print('=> Epoch: %2d Time: %s Train loss: %.2f, Test loss: %.2f' % (epoch, log_time, train_epoch_loss, test_epoch_loss))
 
 
 if __name__ == '__main__':
