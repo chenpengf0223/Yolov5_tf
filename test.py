@@ -25,22 +25,24 @@ if __name__ == '__main__':
     gpu_id = '0' #argv[1]
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
-    pb_file = 'checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb' #argv[2]
+    #pb_file = 'checkpoint/social_yolov3_test-loss=3.3218.ckpt-51.pb' #argv[2]
+    pb_file = 'checkpoint-v2-2022-05-08_15-48-47/qixing_yolov3_test-loss=3.0047.ckpt-976.pb' #argv[2]
     if not os.path.exists(pb_file):
         print('pb_file=%s not exist' % pb_file)
         sys.exit()
 
-    img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/tusi/tusi-201130-1647' #argv[3]
+    #img_path_file = '/home/chenp/YOLOv4-pytorch/qixing-data/test/tusi/tusi-201130-1647' #argv[3]
+    img_path_file = '/home/haishi/suanfa/20220505data/dataset/test' 
     if not os.path.exists(img_path_file):
         print('img_path_file=%s not exist' % img_path_file)
         sys.exit()
 
-    out_path = 'det_out' #argv[4]
+    out_path = 'det_out--5-14' #argv[4]
     if not os.path.exists(out_path):
         os.makedirs(out_path)
     print('test gpu_id=%s, pb_file=%s, img_file=%s, out_path=%s' % (gpu_id, pb_file, img_path_file, out_path))
 
-    num_classes = 4
+    num_classes = 11 #4
     input_size = 416
     score_thresh = 0.6
 
@@ -84,9 +86,22 @@ if __name__ == '__main__':
                 print('img_path_file=', img_path_file, 'out_file=', out_file)
 
         elif os.path.isdir(img_path_file):
-            img_files = os.listdir(img_path_file)
+            #img_files = os.listdir(img_path_file)
+            img_files = []
+            for files in os.walk(img_path_file):
+                print(files[0])
+                for tp_f in files[2]:
+                    tpp_f = files[0] + '/' + tp_f 
+                    if not os.path.exists(tpp_f):
+                        print('in_img_file=', tpp_f, ' not exist')
+                        continue
+                    if tpp_f[-4:] != '.jpg':
+                        print('in_img_file=', tpp_f, ' is not jpg')
+                        continue
+                    img_files.append(tpp_f)
+    
             for idx, img_file in enumerate(img_files):
-                in_img_file = os.path.join(img_path_file, img_file)
+                in_img_file = img_file #os.path.join(img_path_file, img_file)
                 #print('idx=', idx, 'in_img_file=', in_img_file)
                 if not os.path.exists(in_img_file):
                     print('idx=', idx, 'in_img_file=', in_img_file, ' not exist')
@@ -95,6 +110,7 @@ if __name__ == '__main__':
                 img = cv2.imread(in_img_file)
                 if img is None:
                     print('idx=', idx, 'in_img_file=', in_img_file, ' read error')
+                    input()
                     continue
 
                 img_size = img.shape[:2]
