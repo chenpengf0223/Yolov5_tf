@@ -1,0 +1,6 @@
+/home/haishi/FoodRecognition/FoodRecognition/build_android/CMakeFiles/edit_cache.dir
+/home/haishi/FoodRecognition/FoodRecognition/build_android/CMakeFiles/rebuild_cache.dir
+/home/haishi/FoodRecognition/FoodRecognition/build_android/CMakeFiles/FoodRecognition.dir
+/home/haishi/FoodRecognition/FoodRecognition/build_android/detection/CMakeFiles/rebuild_cache.dir
+/home/haishi/FoodRecognition/FoodRecognition/build_android/detection/CMakeFiles/edit_cache.dir
+/home/haishi/FoodRecognition/FoodRecognition/build_android/detection/CMakeFiles/Detector.dir

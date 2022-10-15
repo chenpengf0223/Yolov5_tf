@@ -1,0 +1,65 @@
+add_library(Detector SHARED ${CMAKE_CURRENT_SOURCE_DIR}/detector.cpp)
+
+#message(${OpenCV_LIBS})
+#message(${Tensorflow::Lite})
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
+
+set(CP_TARGET_LIBS
+    #tensorflowlite_gpu_gl
+    tensorflowlite
+    tensorflowlite_gpu_delegate
+    opencv_core
+    opencv_highgui
+    opencv_calib3d
+opencv_features2d
+opencv_flann
+opencv_imgcodecs
+opencv_imgproc
+opencv_ml
+opencv_objdetect
+opencv_optflow
+opencv_photo
+opencv_shape
+opencv_stitching
+opencv_superres
+opencv_video
+opencv_videoio
+opencv_videostab
+opencv_ximgproc
+)
+    #gl_delegate.pic
+foreach(__component ${CP_TARGET_LIBS})
+    add_library(share_${__component} SHARED IMPORTED)
+    set_target_properties(
+        share_${__component}
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_CURRENT_SOURCE_DIR}/../gpu_lib/r2-4/lib${__component}.so
+    )
+    message(STATUS "mylog   ${CMAKE_CURRENT_SOURCE_DIR}/../gpu_lib/r2-4/lib${__component}.so")
+    set(LINK_LIBRARIES_LIST ${LINK_LIBRARIES_LIST} share_${__component})
+endforeach()
+
+
+set(CP_TARGET_STATIC_LIBS
+    #tensorflow-lite
+    #gl_delegate.pic
+    )
+foreach(__component ${CP_TARGET_STATIC_LIBS})
+    add_library(static_${__component} STATIC IMPORTED)
+    set_target_properties(
+        static_${__component}
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_CURRENT_SOURCE_DIR}/../gpu_lib/lib${__component}.a
+    )
+    set(LINK_LIBRARIES_LIST ${LINK_LIBRARIES_LIST} static_${__component})
+endforeach()
+
+
+target_link_libraries(Detector
+    PRIVATE ${LINK_LIBRARIES_LIST}
+    #PRIVATE Tensorflow::Lite
+    #PUBLIC ${OpenCV_LIBS}
+    #PUBLIC opencv_core opencv_highgui
+    #log
+)
